@@ -1,6 +1,6 @@
-package com.casestudy.digitopiacasestudy.Entity;
+package com.casestudy.digitopiacasestudy.entity;
 
-import com.casestudy.digitopiacasestudy.Enum.InvitationStatus;
+import com.casestudy.digitopiacasestudy.enums.InvitationStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

@@ -1,7 +1,7 @@
-package com.casestudy.digitopiacasestudy.Entity;
+package com.casestudy.digitopiacasestudy.entity;
 
-import com.casestudy.digitopiacasestudy.Enum.UserRole;
-import com.casestudy.digitopiacasestudy.Enum.UserStatus;
+import com.casestudy.digitopiacasestudy.enums.UserRole;
+import com.casestudy.digitopiacasestudy.enums.UserStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

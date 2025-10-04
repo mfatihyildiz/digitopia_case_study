@@ -1,4 +1,4 @@
-package com.casestudy.digitopiacasestudy.Entity;
+package com.casestudy.digitopiacasestudy.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

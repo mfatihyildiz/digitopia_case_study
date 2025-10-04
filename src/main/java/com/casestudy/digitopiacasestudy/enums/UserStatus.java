@@ -1,4 +1,4 @@
-package com.casestudy.digitopiacasestudy.Enum;
+package com.casestudy.digitopiacasestudy.enums;
 
 public enum UserStatus {
     ACTIVE,
