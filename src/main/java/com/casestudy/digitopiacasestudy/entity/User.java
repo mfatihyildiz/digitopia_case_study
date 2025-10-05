@@ -12,8 +12,13 @@ import lombok.Setter;
 
 import java.util.HashSet;
 import java.util.Set;
+
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = {
+        @Index(name = "idx_user_email", columnList = "email"),
+        @Index(name = "idx_user_normalized_name", columnList = "normalizedName"),
+        @Index(name = "idx_user_status", columnList = "status")
+})
 @Getter
 @Setter
 public class User extends BaseEntity {

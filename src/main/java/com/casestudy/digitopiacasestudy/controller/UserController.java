@@ -1,5 +1,6 @@
 package com.casestudy.digitopiacasestudy.controller;
 
+import com.casestudy.digitopiacasestudy.entity.Organization;
 import com.casestudy.digitopiacasestudy.entity.User;
 import com.casestudy.digitopiacasestudy.service.UserService;
 import jakarta.validation.Valid;
@@ -7,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,5 +48,16 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/organizations")
+    public ResponseEntity<List<Organization>> getUserOrganizations(@PathVariable UUID id) {
+        User user = userService.getUserById(id);
+        return ResponseEntity.ok(new ArrayList<>(user.getOrganizations()));
+    }
+
+    @GetMapping("/search/name")
+    public ResponseEntity<List<User>> searchByNormalizedName(@RequestParam String name) {
+        return ResponseEntity.ok(userService.searchByNormalizedName(name));
     }
 }

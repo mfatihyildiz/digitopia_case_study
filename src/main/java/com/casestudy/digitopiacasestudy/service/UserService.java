@@ -51,4 +51,8 @@ public class UserService {
         user.setStatus(UserStatus.DELETED);
         userRepository.save(user);
     }
+
+    public List<User> searchByNormalizedName(String normalizedName) {
+        return userRepository.findByNormalizedNameContainingIgnoreCase(normalizedName);
+    }
 }

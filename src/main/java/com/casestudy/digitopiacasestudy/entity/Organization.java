@@ -7,8 +7,13 @@ import lombok.Setter;
 
 import java.util.HashSet;
 import java.util.Set;
+
 @Entity
-@Table(name = "organizations")
+@Table(name = "organizations", indexes = {
+        @Index(name = "idx_org_registry_number", columnList = "registryNumber"),
+        @Index(name = "idx_org_normalized_name", columnList = "normalizedOrganizationName"),
+        @Index(name = "idx_org_year_size", columnList = "yearFounded, companySize")
+})
 @Getter
 @Setter
 public class Organization extends BaseEntity {
@@ -40,11 +45,7 @@ public class Organization extends BaseEntity {
     private Integer yearFounded;
 
     @ManyToMany
-    @JoinTable(
-            name = "organization_users",
-            joinColumns = @JoinColumn(name = "organization_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
+    @JoinTable(name = "organization_users", joinColumns = @JoinColumn(name = "organization_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> users = new HashSet<>();
 
     public void setOrganizationName(String organizationName) {

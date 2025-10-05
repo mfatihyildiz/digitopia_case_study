@@ -1,12 +1,14 @@
 package com.casestudy.digitopiacasestudy.controller;
 
 import com.casestudy.digitopiacasestudy.entity.Organization;
+import com.casestudy.digitopiacasestudy.entity.User;
 import com.casestudy.digitopiacasestudy.service.OrganizationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,7 +43,8 @@ public class OrganizationController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Organization> updateOrganization(@PathVariable UUID id, @RequestBody Organization organization) {
+    public ResponseEntity<Organization> updateOrganization(@PathVariable UUID id,
+                                                           @RequestBody Organization organization) {
         return ResponseEntity.ok(organizationService.updateOrganization(id, organization));
     }
 
@@ -49,5 +52,16 @@ public class OrganizationController {
     public ResponseEntity<Void> deleteOrganization(@PathVariable UUID id) {
         organizationService.deleteOrganization(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/users")
+    public ResponseEntity<List<User>> getOrganizationUsers(@PathVariable UUID id) {
+        Organization organization = organizationService.getById(id);
+        return ResponseEntity.ok(new ArrayList<>(organization.getUsers()));
+    }
+
+    @GetMapping("/search/registry")
+    public ResponseEntity<Organization> getByRegistryNumber(@RequestParam String registryNumber) {
+        return ResponseEntity.ok(organizationService.getByRegistryNumber(registryNumber));
     }
 }

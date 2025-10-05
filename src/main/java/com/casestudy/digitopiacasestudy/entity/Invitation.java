@@ -11,8 +11,12 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "invitations",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "organization_id", "status"}))
+@Table(name = "invitations", uniqueConstraints = @UniqueConstraint(columnNames = { "user_id", "organization_id",
+        "status" }), indexes = {
+        @Index(name = "idx_invitation_status", columnList = "status"),
+        @Index(name = "idx_invitation_expiration", columnList = "expirationDate"),
+        @Index(name = "idx_invitation_user_org", columnList = "user_id, organization_id")
+})
 @Getter
 @Setter
 public class Invitation extends BaseEntity {
