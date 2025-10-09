@@ -7,6 +7,7 @@ import com.casestudy.organizationservice.repository.OrganizationRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -35,24 +36,30 @@ public class OrganizationService {
         repository.deleteById(id);
     }
 
-    public void addMember(UUID orgId, UUID userId) {
-        var org = repository.findById(orgId)
-                .orElseThrow(() -> new EntityNotFoundException("Organization not found: " + orgId));
+    @Transactional
+    public Organization update(UUID id, Organization updated) {
+        Organization existing = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Organization not found: " + id));
 
-        boolean exists = memberRepository.existsByOrganizationIdAndUserId(orgId, userId);
-        if (!exists) {
-            OrganizationMember member = new OrganizationMember();
-            member.setOrganizationId(orgId);
-            member.setUserId(userId);
-            memberRepository.save(member);
-        }
+        existing.setOrganizationName(updated.getOrganizationName());
+        existing.setRegistryNumber(updated.getRegistryNumber());
+        existing.setContactEmail(updated.getContactEmail());
+        existing.setCompanySize(updated.getCompanySize());
+        existing.setYearFounded(updated.getYearFounded());
+        return repository.save(existing);
     }
 
-    public void removeMember(UUID orgId, UUID userId) {
-        memberRepository.deleteByOrganizationIdAndUserId(orgId, userId);
+    @Transactional(readOnly = true)
+    public List<Organization> searchByName(String name) {
+        return repository.findByOrganizationNameContainingIgnoreCase(name);
     }
 
-    public List<OrganizationMember> listMembers(UUID orgId) {
-        return memberRepository.findByOrganizationId(orgId);
+    @Transactional(readOnly = true)
+    public List<Organization> getByUserId(UUID userId) {
+        List<UUID> orgIds = memberRepository.findByUserId(userId)
+                .stream()
+                .map(OrganizationMember::getOrganizationId)
+                .toList();
+        return repository.findAllById(orgIds);
     }
 }

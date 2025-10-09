@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
-
 @RestController
 @RequestMapping("/api/organizations")
 @RequiredArgsConstructor
@@ -33,6 +32,14 @@ public class OrganizationController {
         return ResponseEntity.ok(service.create(organization));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Organization> update(
+            @PathVariable UUID id,
+            @RequestBody Organization updated
+    ) {
+        return ResponseEntity.ok(service.update(id, updated));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.delete(id);
@@ -48,7 +55,7 @@ public class OrganizationController {
 
     @GetMapping("/{orgId}/members")
     public ResponseEntity<List<UUID>> listMembers(@PathVariable UUID orgId) {
-        service.getById(orgId); // 404 guard
+        service.getById(orgId);
         return ResponseEntity.ok(memberService.listUserIds(orgId));
     }
 
@@ -58,4 +65,15 @@ public class OrganizationController {
         memberService.removeMember(orgId, userId);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Organization>> searchByName(@RequestParam String name) {
+        return ResponseEntity.ok(service.searchByName(name));
+    }
+
+    @GetMapping("/by-user/{userId}")
+    public ResponseEntity<List<Organization>> getByUser(@PathVariable UUID userId) {
+        return ResponseEntity.ok(service.getByUserId(userId));
+    }
 }
+

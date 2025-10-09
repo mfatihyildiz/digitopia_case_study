@@ -1,7 +1,9 @@
 package com.casestudy.organizationservice.service;
 
+import com.casestudy.organizationservice.entity.Organization;
 import com.casestudy.organizationservice.entity.OrganizationMember;
 import com.casestudy.organizationservice.repository.OrganizationMemberRepository;
+import com.casestudy.organizationservice.repository.OrganizationRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,24 +17,37 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OrganizationMemberService {
 
-    private final OrganizationMemberRepository repo;
+    private final OrganizationMemberRepository orgMemRepo;
+    private final OrganizationRepository orgRepo;
 
     @Transactional
     public void addMember(UUID orgId, UUID userId) {
-        boolean exists = repo.existsByOrganizationIdAndUserId(orgId, userId);
-        if (exists) {
-            return;
+        if (orgMemRepo.existsByOrganizationIdAndUserId(orgId, userId)) {
+            throw new IllegalArgumentException("User is already a member of this organization.");
+        }
+
+        Organization organization = orgRepo.findById(orgId)
+                .orElseThrow(() -> new EntityNotFoundException("Organization not found: " + orgId));
+
+        long currentCount = orgMemRepo.countByOrganizationId(orgId);
+
+        if (currentCount >= organization.getCompanySize()) {
+            throw new IllegalStateException(String.format(
+                    "Organization '%s' has reached its member limit (%d members).",
+                    organization.getOrganizationName(),
+                    organization.getCompanySize()
+            ));
         }
 
         OrganizationMember member = new OrganizationMember();
         member.setOrganizationId(orgId);
         member.setUserId(userId);
-        repo.save(member);
+        orgMemRepo.save(member);
     }
 
     @Transactional(readOnly = true)
     public List<UUID> listUserIds(UUID orgId) {
-        return repo.findByOrganizationId(orgId)
+        return orgMemRepo.findByOrganizationId(orgId)
                 .stream()
                 .map(OrganizationMember::getUserId)
                 .collect(Collectors.toList());
@@ -40,12 +55,12 @@ public class OrganizationMemberService {
 
     @Transactional
     public void removeMember(UUID orgId, UUID userId) {
-        boolean exists = repo.existsByOrganizationIdAndUserId(orgId, userId);
+        boolean exists = orgMemRepo.existsByOrganizationIdAndUserId(orgId, userId);
         if (!exists) {
             throw new EntityNotFoundException(
                     String.format("User %s not found in organization %s", userId, orgId)
             );
         }
-        repo.deleteByOrganizationIdAndUserId(orgId, userId);
+        orgMemRepo.deleteByOrganizationIdAndUserId(orgId, userId);
     }
 }

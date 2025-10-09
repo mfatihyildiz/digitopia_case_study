@@ -11,4 +11,6 @@ import java.util.UUID;
 public interface InvitationRepository extends JpaRepository<Invitation, UUID> {
     Optional<Invitation> findByUserIdAndOrganizationIdAndStatus(UUID userId, UUID organizationId, InvitationStatus status);
     List<Invitation> findByStatus(InvitationStatus status);
+    List<Invitation> findByUserId(UUID userId);
+    List<Invitation> findByOrganizationId(UUID organizationId);
 }

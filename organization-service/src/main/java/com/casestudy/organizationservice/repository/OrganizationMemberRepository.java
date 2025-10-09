@@ -12,4 +12,9 @@ public interface OrganizationMemberRepository extends JpaRepository<Organization
     List<OrganizationMember> findByOrganizationId(UUID organizationId);
 
     void deleteByOrganizationIdAndUserId(UUID organizationId, UUID userId);
+
+    List<OrganizationMember> findByUserId(UUID userId);
+
+    long countByOrganizationId(UUID organizationId);
+
 }

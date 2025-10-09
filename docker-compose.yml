@@ -1,7 +1,7 @@
 version: "3.9"
 
 services:
-  # 🔹 Eureka Discovery Server
+  # Eureka Discovery Server
   discovery-service:
     build: ./discovery-service
     container_name: digitopia-discovery
@@ -21,7 +21,7 @@ services:
       retries: 5
       start_period: 60s
 
-  # 🔹 API Gateway
+  # API Gateway
   api-gateway:
     build: ./api-gateway
     container_name: digitopia-gateway
@@ -45,7 +45,7 @@ services:
       retries: 3
       start_period: 40s
 
-  # 🔹 PostgreSQL - User Service
+  # PostgreSQL - User Service
   postgres-user:
     image: postgres:15
     container_name: postgres-user
@@ -66,7 +66,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # 🔹 User Service
+  # User Service
   user-service:
     build: ./user-service
     container_name: digitopia-user-service
@@ -97,7 +97,7 @@ services:
       retries: 3
       start_period: 40s
 
-  # 🔹 PostgreSQL - Organization Service
+  # PostgreSQL - Organization Service
   postgres-org:
     image: postgres:15
     container_name: postgres-org
@@ -118,7 +118,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # 🔹 Organization Service
+  # Organization Service
   organization-service:
     build: ./organization-service
     container_name: digitopia-organization-service
@@ -149,7 +149,7 @@ services:
       retries: 3
       start_period: 40s
 
-  # 🔹 PostgreSQL - Invitation Service
+  # PostgreSQL - Invitation Service
   postgres-inv:
     image: postgres:15
     container_name: postgres-inv
@@ -170,7 +170,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # 🔹 Invitation Service
+  # Invitation Service
   invitation-service:
     build: ./invitation-service
     container_name: digitopia-invitation-service
@@ -204,13 +204,13 @@ services:
       retries: 3
       start_period: 40s
 
-# 🔸 Volumes
+# Volumes
 volumes:
   user_data:
   org_data:
   inv_data:
 
-# 🔸 Network
+# Network
 networks:
   digitopia-net:
     driver: bridge

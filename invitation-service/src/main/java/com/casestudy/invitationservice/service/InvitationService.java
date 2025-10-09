@@ -3,13 +3,16 @@ package com.casestudy.invitationservice.service;
 import com.casestudy.invitationservice.entity.Invitation;
 import com.casestudy.invitationservice.enums.InvitationStatus;
 import com.casestudy.invitationservice.repository.InvitationRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
@@ -34,13 +37,23 @@ public class InvitationService {
 
     public Invitation getById(UUID id) {
         return repo.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Invitation not found: " + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invitation not found: " + id));
     }
 
+    public List<Invitation> getByUserId(UUID userId) {
+        return repo.findByUserId(userId);
+    }
+
+    public List<Invitation> getByOrganizationId(UUID orgId) {
+        return repo.findByOrganizationId(orgId);
+    }
+
+    @Transactional
     public Invitation create(Invitation inv) {
         repo.findByUserIdAndOrganizationIdAndStatus(inv.getUserId(), inv.getOrganizationId(), InvitationStatus.PENDING)
                 .ifPresent(x -> {
-                    throw new IllegalArgumentException("Pending invitation already exists for this user & organization");
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "A pending invitation already exists for this user and organization.");
                 });
 
         inv.setStatus(InvitationStatus.PENDING);
@@ -50,32 +63,46 @@ public class InvitationService {
         return repo.save(inv);
     }
 
+    @Transactional
     public Invitation updateStatus(UUID id, InvitationStatus status) {
-        var inv = getById(id);
+        Invitation inv = getById(id);
         inv.setStatus(status);
-        var saved = repo.save(inv);
+        Invitation saved = repo.save(inv);
 
         if (status == InvitationStatus.ACCEPTED) {
             notifyOrganizationService(inv);
         }
-
         return saved;
     }
 
+    @Transactional
+    public void delete(UUID id) {
+        Invitation inv = getById(id);
+        repo.delete(inv);
+    }
+
+    @Transactional
     public void expireOld() {
         var pending = repo.findByStatus(InvitationStatus.PENDING);
         var now = LocalDateTime.now();
+
         pending.stream()
                 .filter(i -> i.getExpirationDate() != null && i.getExpirationDate().isBefore(now))
                 .forEach(i -> {
                     i.setStatus(InvitationStatus.EXPIRED);
                     repo.save(i);
                 });
+
+        log.info("Expired invitations cleanup completed at {}", now);
+    }
+
+    @Scheduled(cron = "0 0 0 * * *")
+    public void scheduledExpireOldInvitations() {
+        expireOld();
     }
 
     private void notifyOrganizationService(Invitation inv) {
         RestClient restClient = restClientBuilder.build();
-
         try {
             URI uri = UriComponentsBuilder
                     .fromHttpUrl(organizationBaseUrl)
